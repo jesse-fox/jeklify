@@ -1,0 +1,28 @@
+{
+  "name": "jeklify",
+  "version": "1.0.0",
+  "description": "Convert a list of websites to jekyll pages with frontmatter.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jane-fox/jeklify.git"
+  },
+  "keywords": [
+    "jekyll",
+    "frontmatter",
+    "converter",
+    "node"
+  ],
+  "author": "Jane Fox",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jane-fox/jeklify/issues"
+  },
+  "homepage": "https://github.com/jane-fox/jeklify#readme",
+  "devDependencies": {
+    "request": "^2.85.0"
+  }
+}
