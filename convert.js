@@ -18,7 +18,7 @@ function Jeklify() {
 
     self.folder = "./website/";
 
-    self.base_url = "http://www.personalloans.org";
+    self.base_url = "http://www.poppy-opossum.com";
     self.url_list = "./list.txt";
 
     // make sure folder exists before trying to use it
