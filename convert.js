@@ -1,6 +1,14 @@
+
 var fs = require("fs");
 var request = require("request");
+var cheerio = require("cheerio");
+var $ = require("jquery");
+var jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
+
+
+// Set tool for bulk replace
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
@@ -10,6 +18,8 @@ String.prototype.replaceAll = function(search, replacement) {
 function Jeklify() {
 
   var self = this;
+  self.fails = [];
+
 
   // Config for converter goes here
   self.init = function() {
@@ -32,6 +42,7 @@ function Jeklify() {
   }; // init()
 
 
+  // Loads list of URLs and requests each
   self.convert = function() {
 
     //console.log("converting...");
@@ -40,6 +51,7 @@ function Jeklify() {
     fs.readFile(self.url_list, 'utf8', function (err,data) {
 
       if (err) { 
+        console.error("Couldn't open URL list from " + self.url_list);
         console.error(err);
       } else {
 
@@ -53,6 +65,7 @@ function Jeklify() {
 
         }); //forEach url
 
+
       } // if not err
 
     }); // readfile
@@ -64,11 +77,15 @@ function Jeklify() {
   // load page from web
   self.get_site = function(url) {
 
+    // get request to website
     request(url, function (error, response, body) {
 
       if (error != null) {
-        console.error("Error trying to save site");
+
+        console.error("Failed to load " + url);
         console.error(error);
+        self.fails.push[url];
+
       } else {
 
         // send html response to be saved locally
@@ -86,21 +103,23 @@ function Jeklify() {
   self.save_file = function(url, content) {
 
     var slug = self.make_slug(url);
-
-    var link = url.replace(self.base_url, "");
-    var frontmatter = "---\n permalink: " + link + "\n---\n";
+    var frontmatter = self.make_frontmatter(url, content);
 
     var html = frontmatter + content;
 
     fs.writeFile( self.folder + slug + ".html", html, function(err) {
+
       if(err) {
-        return console.log(err);
+
+        console.error("Problem writing to " + slug + ".html");
+        console.error(err);
+        self.fails.push[slug];
+
       } else {
         console.log("Saved: " + slug);
       }
 
     }); 
-
 
   }; // save_file();
 
@@ -133,6 +152,44 @@ function Jeklify() {
     return slug;
 
   }; // make_slug()
+
+
+  // Generate frontmatter out of HTML
+  self.make_frontmatter = function(url, content) {
+
+    var link = url.replace(self.base_url, "");
+
+    var frontmatter = "---\n permalink: " + link + "\n---\n";
+
+    //var $ = cheerio.load(content);
+    var head_tags = [];
+
+    var dom = new JSDOM(content);
+    //console.log(dom);
+
+    var test = $(dom).find("head");
+
+    console.log(test);
+
+
+    var data = [];
+
+    console.log(head_tags);
+
+    head_tags.forEach(function(tag) {
+
+      console.log(tag.type);
+
+      data[tag.type].push(tag.attribs);
+
+
+    });
+
+
+
+    return frontmatter;
+
+  };
 
 
   // Run init when new object is created
