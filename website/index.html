@@ -5,18 +5,17 @@ title: teeheetitlehere
 
 head:
  - meta:
-      attr: test
-      attr: test23
-      beep: boop
+     - { http-equiv: "Content-Type", content: "text/html; charset=UTF-8" }
+     - { name: "ComicPress", content: "4.4" }
+
 
  - link:
-    - wowsa:
-      yip: test1
-      test: test2
-
+     - { rel: 'dns-prefetch', href: '//s0.wp.com' }
+     - { rel: 'dns-prefetch', href: '//secure.gravatar.com' }
+     - { rel: "stylesheet", href: "http://www.poppy-opossum.com/wp-content/themes/comicpress/style.css", type: "text/css", media: "screen" }
+ 
 ---
  
-
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"> 
@@ -31,12 +30,32 @@ head:
 
 <br><hr><br>
 
-    {% assign head = page.head %}
-    {% assign meta = head["meta"] %}
-    {% for item in head %}
-    <p> Item: 
-        {{ item }}
-    </p>
+    {% for head_tags in page.head %}
+        {% for tags in head_tags %}
+
+            {% if tags[0] == "meta" or tags[0] == "link" %}
+
+                {% for tag in tags[1] %}
+
+                    ( {{tags[0]}} {%for attr in tag%} {{attr[0]}}="{{attr[1]}}"{%endfor%}><br>
+
+                {% endfor %}
+
+
+            {% endif %} 
+
+            {% if tags[0] == "script" or tags[0] == "style" or tags[0] == 'noscript' %}
+
+                {% for tag in tags[1] %}
+
+                    ( {{tags[0]}} {%for attr in tag%} {{attr[0]}}="{{attr[1]}}"{%endfor%}><br>
+
+                {% endfor %}
+
+
+            {% endif %} 
+
+        {% endfor %}
     {% endfor %}
 
 
