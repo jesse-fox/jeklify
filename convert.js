@@ -178,14 +178,21 @@ function Jeklify() {
     // do a thing, possibly async, then…
     head_content.forEach(function(item) {
 
-      if (item.type != "text" && item.type != "comment") {
+      if (item.name == "meta" ||
+          item.name == "link" ||
+          item.name == "script" ||
+          item.name == "style" ||
+          item.name == "noscript"
+      ) {
 
         item.parent = null;
         item.next = null;
         item.prev = null;
 
+        console.log(item.children);
+
         //console.log(item.type + " - " + item.name);
-        data[item.name].push(item);
+        data[item.name].push(item.attribs);
       }
 
     });
