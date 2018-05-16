@@ -1,11 +1,8 @@
 
 var fs = require("fs");
 var request = require("request");
+var fm = require("front-matter");
 var cheerio = require("cheerio");
-var $ = require("jquery");
-var jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-
 
 
 // Set tool for bulk replace
@@ -161,29 +158,55 @@ function Jeklify() {
 
     var frontmatter = "---\n permalink: " + link + "\n---\n";
 
-    //var $ = cheerio.load(content);
-    var head_tags = [];
+    var $ = cheerio.load(content);
 
-    var dom = new JSDOM(content);
-    //console.log(dom);
-
-    var test = $(dom).find("head");
-
-    console.log(test);
-
+    var head_content = $("head")[0].children;
 
     var data = [];
+    data["meta"] = [];
+    data["link"] = [];
+    data["noscript"] = [];
+    data["script"] = [];
+    data["style"] = [];
+    data["title"] = [];
 
-    console.log(head_tags);
 
-    head_tags.forEach(function(tag) {
 
-      console.log(tag.type);
 
-      data[tag.type].push(tag.attribs);
 
+    var promise = new Promise(function(resolve, reject) {
+    // do a thing, possibly async, then…
+    head_content.forEach(function(item) {
+
+      if (item.type != "text" && item.type != "comment") {
+
+        item.parent = null;
+        item.next = null;
+        item.prev = null;
+
+        //console.log(item.type + " - " + item.name);
+        data[item.name].push(item);
+      }
 
     });
+
+    if (true) {
+      resolve(data);
+    }
+    else {
+      reject(Error("It broke"));
+    }
+  });
+
+    promise.then(function(result) {
+
+    console.log(result); // "Stuff worked!"
+
+    
+
+  }, function(err) {
+    console.log(err); // Error: "It broke"
+  });
 
 
 
