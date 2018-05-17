@@ -5,6 +5,7 @@ var fm = require("front-matter");
 var cheerio = require("cheerio");
 
 
+
 // Set tool for bulk replace
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
@@ -73,6 +74,8 @@ function Jeklify() {
 
   // load page from web
   self.get_site = function(url) {
+
+    console.info("Fetching " + url);
 
     // get request to website
     request(url, function (error, response, body) {
@@ -154,22 +157,42 @@ function Jeklify() {
   // Generate frontmatter out of HTML
   self.make_frontmatter = function(url, content) {
 
-    // Copy permalink from url we loaded from.
-    var link = url.replace(self.base_url, "");
-
     // Cheerio is like jQuery so we can get header tags
     var $ = cheerio.load(content);
 
+
     // Stores all header tags
     var head_content = $("head")[0].children;
+    var head_data = self.gather_fm_data(head_content);
+    var head_fm = self.format_fm_data(head_data);
 
-    var title = $("title");
-    console.log(title[0].children[0].data);
+    console.log("HELLO");
+    //console.log(head_fm);
+    console.log("GOODBYE");
 
-    var frontmatter = "---\n permalink: " + link + "\n";
+    var title = $("title")[0].children[0].data;
+
+    // Copy permalink from url we loaded from.
+    var link = url.replace(self.base_url, "");
+
+ 
+    // Glue it all together
+    var frontmatter = "---\n";
+    frontmatter += "permalink: " + link + "\n";
+    frontmatter += "title: " + title + "\n";
+    frontmatter += "head: \n";
+    frontmatter += head_fm;
+    frontmatter += "\n---\n";
+
+    return frontmatter;
+
+  }; // make_frontmatter
 
 
+  // Go through everything in a header and store it in a var
+  self.gather_fm_data = function(header_tags) {
 
+    // Set up var to hold exact data we want
     var data = [];
     data["meta"] = [];
     data["link"] = [];
@@ -179,69 +202,84 @@ function Jeklify() {
     data["title"] = [];
 
 
+    for (var i = 0; i < header_tags.length; i++) {
+
+      var item = header_tags[i];
+
+      // Only work with these kinds of tags.
+      if (item.name == "meta" || 
+          item.name == "link" ||
+          item.name == "script" || 
+          item.name == "style" || 
+          item.name == "noscript"
+      ) {
+
+        var content = "";
 
 
-
-    // Loop through every tag in header, store it to data[]
-    var promise = new Promise(function(resolve, reject) {
-
-      head_content.forEach(function(item) {
-
-        if (item.name == "meta" || item.name == "link") {
-
-          //console.log(item.type + " - " + item.name);
-          data[item.name].push(item.attribs);
-
-        } else if (item.name == "script" || item.name == "style" || item.name == "noscript") {
-
-          var content = " ";
-
-
-          if (item.children.length > 0) {
-            content = item.children[0].data;
-          }
-
-          data[item.name].push({attr: item.attribs, content: content});
-
+        if (item.children.length > 0) {
+          content = item.children[0].data;
         }
 
-      }); // foreach head tag
+        data[item.name].push({attr: item.attribs, content: content});
 
-      if (true) {
-        resolve(data);
+      } // if (tag type)
+
+      // Don't return until each item has been gone through
+      if (i == header_tags.length-1) {
+        //console.log(data);
+        return data;
       }
-      else {
-        reject(Error("It broke"));
+
+    } // for
+
+
+  }; // gather_fm_data
+
+
+  // add ' - ' indentation levels
+  self.format_fm_data = function(data) {
+
+    var frontmatter = "";
+    var counter = 0;
+    var total = 0;
+
+    // Kinda ugly but not sure how else.
+    if (data["link"]) total += data["link"].length;
+    if (data["meta"]) total += data["meta"].length;
+    if (data["script"]) total += data["script"].length;
+    if (data["style"]) total += data["style"].length;
+    if (data["noscript"]) total += data["noscript"].length;
+
+
+    for (var type in data) {
+
+      frontmatter += " - " + type + ":\n";
+
+      for (var i = 0; i < data[type].length; i++) {
+
+        counter++;
+
+        var item = data[type][i];
+
+        frontmatter += "    - " + JSON.stringify(item) + "\n";
+
+
+      } // for data[type]
+
+      if (counter == total) {
+        return frontmatter;
       }
 
-    }); // promise
+    } // for types
 
 
-    // Promise lets us wait until the above loop is completely finished
-    promise.then(function(result) {
-
-      result.forEach(function(header_tag) {
-
-        //console.log(" - " + header_tag);
-
-      });
-
-    console.log(result); // "Stuff worked!"
-
-  }, function(err) {
-    console.log(err); // Error: "It broke"
-  });   
-
-
-
-    return frontmatter;
-
-  };
+  }; // format_fm_data
 
 
   // Run init when new object is created
   self.init();
 
-}
+} // Jeklify
 
 var converter = new Jeklify();

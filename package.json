@@ -25,8 +25,7 @@
   "devDependencies": {
     "cheerio": "^1.0.0-rc.2",
     "front-matter": "^2.3.0",
-    "jquery": "^3.3.1",
-    "jsdom": "^11.10.0",
     "request": "^2.85.0"
-  }
+  },
+  "dependencies": {}
 }
