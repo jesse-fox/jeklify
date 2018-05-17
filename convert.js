@@ -154,13 +154,21 @@ function Jeklify() {
   // Generate frontmatter out of HTML
   self.make_frontmatter = function(url, content) {
 
+    // Copy permalink from url we loaded from.
     var link = url.replace(self.base_url, "");
 
-    var frontmatter = "---\n permalink: " + link + "\n---\n";
-
+    // Cheerio is like jQuery so we can get header tags
     var $ = cheerio.load(content);
 
+    // Stores all header tags
     var head_content = $("head")[0].children;
+
+    var title = $("title");
+    console.log(title[0].children[0].data);
+
+    var frontmatter = "---\n permalink: " + link + "\n";
+
+
 
     var data = [];
     data["meta"] = [];
@@ -174,46 +182,55 @@ function Jeklify() {
 
 
 
+    // Loop through every tag in header, store it to data[]
     var promise = new Promise(function(resolve, reject) {
-    // do a thing, possibly async, then…
-    head_content.forEach(function(item) {
 
-      if (item.name == "meta" ||
-          item.name == "link" ||
-          item.name == "script" ||
-          item.name == "style" ||
-          item.name == "noscript"
-      ) {
+      head_content.forEach(function(item) {
 
-        item.parent = null;
-        item.next = null;
-        item.prev = null;
+        if (item.name == "meta" || item.name == "link") {
 
-        console.log(item.children);
+          //console.log(item.type + " - " + item.name);
+          data[item.name].push(item.attribs);
 
-        //console.log(item.type + " - " + item.name);
-        data[item.name].push(item.attribs);
+        } else if (item.name == "script" || item.name == "style" || item.name == "noscript") {
+
+          var content = " ";
+
+
+          if (item.children.length > 0) {
+            content = item.children[0].data;
+          }
+
+          data[item.name].push({attr: item.attribs, content: content});
+
+        }
+
+      }); // foreach head tag
+
+      if (true) {
+        resolve(data);
+      }
+      else {
+        reject(Error("It broke"));
       }
 
-    });
+    }); // promise
 
-    if (true) {
-      resolve(data);
-    }
-    else {
-      reject(Error("It broke"));
-    }
-  });
 
+    // Promise lets us wait until the above loop is completely finished
     promise.then(function(result) {
+
+      result.forEach(function(header_tag) {
+
+        //console.log(" - " + header_tag);
+
+      });
 
     console.log(result); // "Stuff worked!"
 
-    
-
   }, function(err) {
     console.log(err); // Error: "It broke"
-  });
+  });   
 
 
 
