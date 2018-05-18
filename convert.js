@@ -24,9 +24,9 @@ function Jeklify() {
 
     //console.log("Starting programme");
 
-    self.folder = "./website/";
+    self.folder = "./_pages/";
 
-    self.base_url = "http://www.poppy-opossum.com";
+    self.base_url = "http://www.online-accounting-degrees.net";
     self.url_list = "./list.txt";
 
     // make sure folder exists before trying to use it
@@ -75,15 +75,19 @@ function Jeklify() {
   // load page from web
   self.get_site = function(url) {
 
-    console.info("Fetching " + url);
+    //console.info("Fetching " + url);
 
     // get request to website
-    request(url, function (error, response, body) {
+    request(encodeURI(url), function (error, response, body) {
 
       if (error != null) {
 
         console.error("Failed to load " + url);
+        console.info("Error: ");
         console.error(error);
+        console.info("response: ");
+        console.error(response);
+
         self.fails.push[url];
 
       } else {
@@ -102,10 +106,13 @@ function Jeklify() {
   // Adds frontmatter; saves in folder set in init
   self.save_file = function(url, content) {
 
+    content = content.replaceAll(self.base_url, "{{ site.url }}");
+
     var slug = self.make_slug(url);
     var frontmatter = self.make_frontmatter(url, content);
+    var page = self.prepare_page(content);
 
-    var html = frontmatter + content;
+    var html = frontmatter + page;
 
     fs.writeFile( self.folder + slug + ".html", html, function(err) {
 
@@ -116,7 +123,7 @@ function Jeklify() {
         self.fails.push[slug];
 
       } else {
-        console.log("Saved: " + slug);
+        //console.log("Saved: " + slug);
       }
 
     }); 
@@ -164,13 +171,23 @@ function Jeklify() {
     // Stores all header tags
     var head_content = $("head")[0].children;
     var head_data = self.gather_fm_data(head_content);
+
+    if (head_data == undefined) {
+      console.error("Undefined header data on " + url);
+      return "---\n";
+    }
+
     var head_fm = self.format_fm_data(head_data);
 
-    console.log("HELLO");
-    //console.log(head_fm);
-    console.log("GOODBYE");
+    // Get title if it exists.
+    var title = "";
+    var $title = $("title");
 
-    var title = $("title")[0].children[0].data;
+    if ( $title && $title[0].children ) {
+      var title = JSON.stringify($title[0].children[0].data);
+      // a ":" will break frontmatter in title.
+      title = title.replace(":", "&#58;");
+    }
 
     // Copy permalink from url we loaded from.
     var link = url.replace(self.base_url, "");
@@ -276,6 +293,18 @@ function Jeklify() {
 
   }; // format_fm_data
 
+
+  self.prepare_page = function(content) {
+
+    // Remove everything until </head>
+    var page = content.substr(content.toLowerCase().indexOf("</head>")+7);
+
+    page = page.replace("</body>", "");
+    page = page.replace("</html>", "");
+
+    return page;
+
+  }
 
   // Run init when new object is created
   self.init();
