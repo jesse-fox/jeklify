@@ -26,7 +26,7 @@ function Jeklify() {
 
     self.folder = "./_pages/";
 
-    self.base_url = "http://www.online-accounting-degrees.net";
+    self.base_url = "http://www.personalloans.org";
     self.url_list = "./list.txt";
 
     // make sure folder exists before trying to use it
@@ -105,8 +105,6 @@ function Jeklify() {
 
   // Adds frontmatter; saves in folder set in init
   self.save_file = function(url, content) {
-
-    content = content.replaceAll(self.base_url, "{{ site.url }}");
 
     var slug = self.make_slug(url);
     var frontmatter = self.make_frontmatter(url, content);
