@@ -25,3 +25,13 @@ That's it for the converter. Other steps for putting together website:
 
 6. Copy all used assets from live site into your project. The easiest way to do this is create a list of all assets using screaming frog and save it in a text, then from the command line run `wget -x --force-directories -i list.txt` it will copy the directories as well.
 
+
+
+
+## Gotchas
+
+Weird problems you might run into and what to do about them.
+
+ - Any asset files with a ? or # will cause netlify to fail to build. e.g. pagenavi-css.css?ver=2.70 to fix, just remove them and everything after, then do a find and replace in your files to update them.
+
+ - the conversion will currently fail if there's unexpected input, such as a blank line
