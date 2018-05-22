@@ -24,7 +24,7 @@
   "homepage": "https://github.com/jane-fox/jeklify#readme",
   "devDependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "front-matter": "^2.3.0",
+    "fs-extra": "^6.0.1",
     "request": "^2.85.0"
   },
   "dependencies": {}

@@ -1,7 +1,6 @@
 
-var fs = require("fs");
+var fs = require("fs-extra");
 var request = require("request");
-var fm = require("front-matter");
 var cheerio = require("cheerio");
 
 
@@ -26,7 +25,7 @@ function Jeklify() {
 
     self.folder = "./_pages/";
 
-    self.base_url = "http://www.personalloans.org";
+    self.base_url = "http://www.poppy-opossum.com";
     self.url_list = "./list.txt";
 
     // make sure folder exists before trying to use it
@@ -112,7 +111,7 @@ function Jeklify() {
 
     var html = frontmatter + content;
 
-    fs.writeFile( self.folder + slug + ".html", html, function(err) {
+    fs.outputFile( self.folder + slug + ".html", html, function(err) {
 
       if(err) {
 
@@ -138,13 +137,13 @@ function Jeklify() {
     slug = decodeURIComponent(slug);
 
     // replace / and space with - (permalinks handled with frontmatter)
-    slug = slug.replaceAll("/", "-");
+    //slug = slug.replaceAll("/", "-");
     slug = slug.replaceAll(" ", "-");
 
     // remove trailing slash, .html
+    slug = slug.replace(".html", "");
     slug = slug.replace(/\/$/, "");
     slug = slug.replace(/-$/, "");
-    slug = slug.replace(".html", "");
 
     // remove preceding -
     slug = slug.replace(/^-/, "");
@@ -189,6 +188,11 @@ function Jeklify() {
 
     // Copy permalink from url we loaded from.
     var link = url.replace(self.base_url, "");
+
+    // Remove trailing slash if present, so we don't end up with doubles
+    link = link.replace(/\/$/, "");
+    link = link + "/";
+
 
  
     // Glue it all together
